@@ -369,14 +369,20 @@ class BusABC(metaclass=ABCMeta):
 
         for _filter in self._filters:
             # check if this filter even applies to the message
+            default_mask = 0x7FF
             if "extended" in _filter:
                 _filter = cast(can.typechecking.CanFilterExtended, _filter)
                 if _filter["extended"] != msg.is_extended_id:
                     continue
-
+                if _filter["extended"] == True:
+                    default_mask = 0x1FFFFFFF
+           
             # then check for the mask and id
             can_id = _filter["can_id"]
-            can_mask = _filter["can_mask"]
+            if "can_mask" in _filter:
+                can_mask = _filter["can_mask"]
+            else:
+                can_mask = default_mask
 
             # basically, we compute
             # `msg.arbitration_id & can_mask == can_id & can_mask`
