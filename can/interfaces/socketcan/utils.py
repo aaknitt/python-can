@@ -26,7 +26,13 @@ def pack_filters(can_filters: Optional[typechecking.CanFilters] = None) -> bytes
     filter_data = []
     for can_filter in can_filters:
         can_id = can_filter["can_id"]
-        can_mask = can_filter["can_mask"]
+        can_mask = 0x7FF  #default mask for 11 bit can_id
+        if "can_mask" in can_filter:
+            can_mask = can_filter["can_mask"]
+        else:
+            if "extended" in can_filter:
+                if can_filter["extended"]:
+                    can_mask = 0x1FFFFFFF  #default 29 bit ID mask
         if "extended" in can_filter:
             can_filter = cast(typechecking.CanFilterExtended, can_filter)
             # Match on either 11-bit OR 29-bit messages instead of both
